@@ -1,0 +1,124 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                   COA GENERATOR - QUICK START GUIDE                      ║
+║                                                                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+✅ STATUS: READY TO USE!
+
+📊 Your data has been extracted:
+   • 3 Raw Material products (from RM folder)
+   • 11 Finish Goods products (from FG folder)
+   • All specifications from your Word documents
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 HOW TO START (3 EASY STEPS):
+
+   1️⃣  Double-click: START-SERVER.command
+       (A Terminal window will open - keep it open!)
+
+   2️⃣  Open your web browser and go to:
+       http://localhost:8000/login.html
+
+   3️⃣  Login with:
+       Username: admin
+       Password: ccpl@2024
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ WHAT YOU'LL SEE:
+
+   Raw Material Test:
+   ┌─────────────────────────────────────────────────────────┐
+   │ Dropdown with 3 products:                               │
+   │   • Methanol (CH3OH) (RM2506001)                        │
+   │   • Methylene Chloride (CH2Cl2) (RM2506002)             │
+   │   • Acetone ((CH3)2CO) (RM2506004)                      │
+   └─────────────────────────────────────────────────────────┘
+
+   Finish Goods Test:
+   ┌─────────────────────────────────────────────────────────┐
+   │ Searchable dropdown with 11 products:                   │
+   │   • F2504001 - Acetone EP/BP                            │
+   │   • F2504001M - Acetone Multi (NF/EP/BP)                │
+   │   • F2508003 - Acetone NF                               │
+   │   • F2506002 - MDC NF                                   │
+   │   • F2506002M - MDC Multi (NF/EP/BP)                    │
+   │   • F2507002 - MDC EP/BP                                │
+   │   • F2509003 - Methanol NF                              │
+   │   • F2510002 - Methanol ND                              │
+   │   • RM2509004 - Methanol HPLC                           │
+   │   • RM2509007 - Methanol EP/BP                          │
+   │   • RM2509007M - Methanol Multi (NF/EP/BP)              │
+   └─────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  IMPORTANT:
+
+   ❌ Do NOT open login.html directly from Finder!
+   ✅ Always use: http://localhost:8000/login.html
+   
+   Why? The dropdowns need a web server to load the product data.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧪 TEST IF IT'S WORKING:
+
+   Go to: http://localhost:8000/test-data-load.html
+   
+   You should see:
+   ✓ SUCCESS!
+   RM Products (3): [list of 3 products]
+   FG Products (11): [list of 11 products]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 MORE HELP:
+
+   • INSTRUCTIONS.md - Complete step-by-step guide
+   • HOW-TO-START.txt - Detailed startup instructions
+   • README.md - Full documentation
+   • DEPLOYMENT_GUIDE.md - How to deploy to Vercel
+   • LOGIN_CREDENTIALS.txt - All user accounts
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🌐 DEPLOY ONLINE:
+
+   When ready to make it accessible online:
+   1. Go to https://vercel.com
+   2. Sign up/login (free)
+   3. Drag and drop this entire folder
+   4. Click "Deploy"
+   5. Done! Your site is live.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 ALL LOGIN ACCOUNTS:
+
+   admin / ccpl@2024
+   qc_manager / qcmanager123
+   qc_analyst1 / analyst001
+   qc_analyst2 / analyst002
+   lab_tech / labtech2024
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ QUICK CHECKLIST:
+
+   ☐ Double-click START-SERVER.command
+   ☐ Go to http://localhost:8000/login.html
+   ☐ Login: admin / ccpl@2024
+   ☐ Test Raw Material dropdown (3 products)
+   ☐ Test Finish Goods search (11 products)
+   ☐ Enter sample data
+   ☐ Generate PDF
+   ☐ Deploy to Vercel!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 Everything is ready! Just follow the 3 steps above and you're good to go!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

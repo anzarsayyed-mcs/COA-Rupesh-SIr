@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COA Generator - CCPL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+        }
+
+        /* Header with Logout */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .user-info {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .logout-btn {
+            padding: 8px 20px;
+            font-size: 14px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+            transform: translateY(-1px);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-back {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .input-group {
+            margin: 30px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Search box */
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding-right: 40px;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            pointer-events: none;
+        }
+
+        .dropdown-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .dropdown-options.show {
+            display: block;
+        }
+
+        .dropdown-option {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+
+        .dropdown-option:hover {
+            background: #f8f9fa;
+        }
+
+        .dropdown-option:last-child {
+            border-bottom: none;
+        }
+
+        .option-code {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .option-name {
+            font-size: 13px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .product-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .product-info h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .coa-form {
+            margin-top: 30px;
+        }
+
+        .form-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .form-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .form-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .form-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .form-table input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .error-message {
+            background: #fee;
+            border: 2px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .spec-column {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .logo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .ccpl-logo {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            letter-spacing: 2px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            button {
+                padding: 12px 30px;
+                font-size: 14px;
+            }
+
+            .info-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .form-table {
+                font-size: 13px;
+            }
+
+            .form-table th,
+            .form-table td {
+                padding: 10px;
+            }
+
+            .logo-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .company-name {
+                font-size: 20px;
+            }
+
+            .ccpl-logo {
+                font-size: 30px;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .company-name {
+                font-size: 18px;
+            }
+
+            .ccpl-logo {
+                font-size: 26px;
+            }
+
+            input[type="text"],
+            input[type="date"],
+            select {
+                font-size: 15px;
+                padding: 10px 12px;
+            }
+
+            .form-table {
+                font-size: 12px;
+            }
+
+            .form-table th,
+            .form-table td {
+                padding: 8px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+            button, .top-bar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Bar with User Info and Logout -->
+        <div class="top-bar">
+            <div class="user-info">
+                Logged in as: <span class="user-name" id="currentUser">User</span>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+
+        <!-- Page 1: Test Type Selection -->
+        <div id="page1" class="page active">
+            <div class="logo-header">
+                <div class="company-name">Certificate of Analysis Generator</div>
+                 <div class="ccpl-logo">
+                    <img src="1.png" alt="CCPL Logo" style="height:80px;">
+                </div>
+            </div>
+            <h1>Quality Control System</h1>
+            <p class="subtitle">Cognizant Chemical Pvt. Ltd.</p>
+
+            <div id="loadingMessage" style="text-align: center; padding: 20px; color: #667eea; font-size: 16px;">
+                Loading product data... Please wait.
+            </div>
+
+            <div id="mainContent" style="display: none;">
+                <h2>Select Test Type</h2>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="selectTestType('raw-material')">Raw Material Test</button>
+                    <button class="btn-secondary" onclick="selectTestType('finish-goods')">Finish Goods Test</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 2: Product Code Entry -->
+        <div id="page2" class="page">
+            <div class="logo-header">
+                <div class="company-name">Certificate of Analysis Generator</div>
+                 <div class="ccpl-logo">
+                    <img src="1.png" alt="CCPL Logo" style="height:80px;">
+                </div>
+            </div>
+            <h2>Enter Product Details</h2>
+            <p class="subtitle">Test Type: <span id="testTypeDisplay"></span></p>
+
+            <div class="input-group" id="rmProductGroup" style="display: none;">
+                <label for="rmProductSelect">Select Chemical:</label>
+                <select id="rmProductSelect" onchange="handleRMSelection()">
+                    <option value="">-- Select Chemical Name --</option>
+                </select>
+            </div>
+
+            <div class="input-group" id="fgProductGroup" style="display: none;">
+                <label for="fgProductSearch">Product Code (Search):</label>
+                <div class="search-box">
+                    <input type="text" id="fgProductSearch" placeholder="Type product code or name to search..."
+                           oninput="handleFGSearch()" onfocus="handleFGSearch()">
+                    <span class="search-icon">🔍</span>
+                    <div id="fgDropdown" class="dropdown-options"></div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="batchNo">Batch No.:</label>
+                <input type="text" id="batchNo" placeholder="Enter batch number (e.g., F2510001)">
+            </div>
+
+            <div class="input-group">
+                <label for="mfgDate">Manufacturing Date:</label>
+                <input type="date" id="mfgDate" onchange="calculateExpiryDate()">
+            </div>
+
+            <div class="input-group">
+                <label for="expiryDate">Expiry Date (Auto-calculated):</label>
+                <input type="date" id="expiryDate" readonly style="background: #f0f0f0;">
+            </div>
+
+            <div id="productCodeError" style="color: red; margin-top: 10px; display: none;">Please select a valid product</div>
+
+            <div class="button-group">
+                <button class="btn-back" onclick="goToPage(1)">Back</button>
+                <button class="btn-primary" onclick="proceedToDataEntry()" id="proceedBtn" disabled>Proceed to Data Entry</button>
+            </div>
+        </div>
+
+        <!-- Page 3: COA Data Entry -->
+        <div id="page3" class="page">
+            <div class="logo-header">
+                <div class="company-name">Certificate of Analysis</div>
+                <div class="ccpl-logo">CCPL</div>
+            </div>
+
+            <div class="product-info">
+                <h3>Product Information</h3>
+                <div class="info-row">
+                    <div class="info-label">Product Name:</div>
+                    <div class="info-value" id="displayProductName">-</div>
+                </div>
+                <div class="info-row" id="productCodeRow">
+                    <div class="info-label">Product Code:</div>
+                    <div class="info-value" id="displayProductCode">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Batch No.:</div>
+                    <div class="info-value" id="displayBatchNo">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Manufacturing Date:</div>
+                    <div class="info-value" id="displayMfgDate">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Expiry Date:</div>
+                    <div class="info-value" id="displayExpiryDate">-</div>
+                </div>
+            </div>
+
+            <div class="coa-form">
+                <h3 style="color: #2c3e50; margin-bottom: 15px;">Test Results Entry</h3>
+                <table class="form-table" id="testTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">Test</th>
+                            <th style="width: 40%;">Specification</th>
+                            <th style="width: 30%;">Reporting Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testTableBody">
+                        <!-- Will be populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="errorMessage" class="error-message">
+                ABOVE MATERIAL DOESN'T COMPLY AS PER SPECIFICATION
+            </div>
+
+            <div class="button-group">
+                <button class="btn-back" onclick="goToPage(2)">Back</button>
+                <button class="btn-success" onclick="generatePDF()">Download PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let rmProducts = [];
+        let fgProducts = [];
+        let currentTestType = '';
+        let currentProductData = null;
+
+        // Check authentication on page load
+        function checkAuth() {
+            const user = sessionStorage.getItem('ccpl_user');
+            if (!user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            const userData = JSON.parse(user);
+            document.getElementById('currentUser').textContent = userData.name;
+            return userData;
+        }
+
+        // Logout handler
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                sessionStorage.removeItem('ccpl_user');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Load product data from JSON files
+        async function loadProductData() {
+            try {
+                console.log('Loading product data...');
+
+                // Load RM products
+                const rmResponse = await fetch('data/rm-products.json');
+                if (!rmResponse.ok) {
+                    throw new Error(`Failed to load RM products: ${rmResponse.status}`);
+                }
+                const rmData = await rmResponse.json();
+                rmProducts = rmData.products;
+                console.log('✓ RM Products loaded:', rmProducts.length);
+
+                // Load FG products
+                const fgResponse = await fetch('data/fg-products.json');
+                if (!fgResponse.ok) {
+                    throw new Error(`Failed to load FG products: ${fgResponse.status}`);
+                }
+                const fgData = await fgResponse.json();
+                fgProducts = fgData.products;
+                console.log('✓ FG Products loaded:', fgProducts.length);
+
+                console.log('✓ All products loaded successfully!');
+                console.log('  - RM Products:', rmProducts.map(p => p.code).join(', '));
+                console.log('  - FG Products:', fgProducts.map(p => p.code).join(', '));
+
+                // Hide loading message and show main content
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+            } catch (error) {
+                console.error('✗ Error loading product data:', error);
+
+                // Show error message on page
+                const loadingMsg = document.getElementById('loadingMessage');
+                loadingMsg.innerHTML = `
+                    <div style="color: #c33; font-weight: bold;">Failed to load product data!</div>
+                    <div style="margin-top: 10px; font-size: 14px;">
+                        Make sure you are accessing via:<br>
+                        <strong>http://localhost:8000/login.html</strong><br>
+                        NOT by opening the file directly!
+                    </div>
+                    <div style="margin-top: 10px; font-size: 13px; color: #666;">
+                        Error: ${error.message}
+                    </div>
+                `;
+
+                alert('Error loading product data!\n\nMake sure you are accessing the page via:\nhttp://localhost:8000/login.html\n\nNOT by opening the file directly!\n\nError: ' + error.message);
+            }
+        }
+
+        function selectTestType(testType) {
+            currentTestType = testType;
+            document.getElementById('testTypeDisplay').textContent =
+                testType === 'raw-material' ? 'Raw Material Test' : 'Finish Goods Test';
+
+            // Show appropriate input method
+            if (testType === 'raw-material') {
+                document.getElementById('rmProductGroup').style.display = 'block';
+                document.getElementById('fgProductGroup').style.display = 'none';
+                populateRMDropdown();
+            } else {
+                document.getElementById('rmProductGroup').style.display = 'none';
+                document.getElementById('fgProductGroup').style.display = 'block';
+            }
+
+            // Reset form
+            document.getElementById('batchNo').value = '';
+            document.getElementById('mfgDate').value = '';
+            document.getElementById('expiryDate').value = '';
+            document.getElementById('proceedBtn').disabled = true;
+            currentProductData = null;
+
+            goToPage(2);
+        }
+
+        function populateRMDropdown() {
+            const select = document.getElementById('rmProductSelect');
+            select.innerHTML = '<option value="">-- Select Chemical Name --</option>';
+
+            // Check if products are loaded
+            if (!rmProducts || rmProducts.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Loading products...';
+                option.disabled = true;
+                select.appendChild(option);
+                console.error('RM Products not loaded yet!');
+                return;
+            }
+
+            rmProducts.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.code;
+                option.textContent = `${product.chemicalName} (${product.code})`;
+                select.appendChild(option);
+            });
+
+            console.log('Populated RM dropdown with', rmProducts.length, 'products');
+        }
+
+        function handleRMSelection() {
+            const select = document.getElementById('rmProductSelect');
+            const selectedCode = select.value;
+
+            if (selectedCode) {
+                currentProductData = rmProducts.find(p => p.code === selectedCode);
+                validateForm();
+            } else {
+                currentProductData = null;
+                document.getElementById('proceedBtn').disabled = true;
+            }
+        }
+
+        function handleFGSearch() {
+            const searchInput = document.getElementById('fgProductSearch');
+            const searchTerm = searchInput.value.toLowerCase();
+            const dropdown = document.getElementById('fgDropdown');
+
+            if (searchTerm.length === 0) {
+                dropdown.classList.remove('show');
+                currentProductData = null;
+                validateForm();
+                return;
+            }
+
+            // Filter products
+            const filtered = fgProducts.filter(p =>
+                p.code.toLowerCase().includes(searchTerm) ||
+                p.name.toLowerCase().includes(searchTerm) ||
+                p.productName.toLowerCase().includes(searchTerm)
+            );
+
+            if (filtered.length > 0) {
+                dropdown.innerHTML = '';
+                filtered.forEach(product => {
+                    const div = document.createElement('div');
+                    div.className = 'dropdown-option';
+                    div.innerHTML = `
+                        <div class="option-code">${product.code}</div>
+                        <div class="option-name">${product.productName}</div>
+                    `;
+                    div.onclick = () => selectFGProduct(product);
+                    dropdown.appendChild(div);
+                });
+                dropdown.classList.add('show');
+            } else {
+                dropdown.innerHTML = '<div class="dropdown-option" style="color: #999;">No products found</div>';
+                dropdown.classList.add('show');
+            }
+        }
+
+        function selectFGProduct(product) {
+            currentProductData = product;
+            document.getElementById('fgProductSearch').value = `${product.code} - ${product.productName}`;
+            document.getElementById('fgDropdown').classList.remove('show');
+            validateForm();
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-box')) {
+                document.getElementById('fgDropdown').classList.remove('show');
+            }
+        });
+
+        function calculateExpiryDate() {
+            const mfgDate = document.getElementById('mfgDate').value;
+            if (mfgDate) {
+                const mfg = new Date(mfgDate);
+                // Add 3 years
+                const expiry = new Date(mfg);
+                expiry.setFullYear(expiry.getFullYear() + 3);
+
+                // Format as YYYY-MM-DD for input field
+                const expiryFormatted = expiry.toISOString().split('T')[0];
+                document.getElementById('expiryDate').value = expiryFormatted;
+
+                validateForm();
+            }
+        }
+
+        function validateForm() {
+            const batchNo = document.getElementById('batchNo').value.trim();
+            const mfgDate = document.getElementById('mfgDate').value;
+            const expiryDate = document.getElementById('expiryDate').value;
+
+            const isValid = currentProductData && batchNo && mfgDate && expiryDate;
+            document.getElementById('proceedBtn').disabled = !isValid;
+        }
+
+        // Add validation on input change
+        document.getElementById('batchNo').addEventListener('input', validateForm);
+
+        function goToPage(pageNumber) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page' + pageNumber).classList.add('active');
+        }
+
+        function proceedToDataEntry() {
+            const batchNo = document.getElementById('batchNo').value;
+            const mfgDate = document.getElementById('mfgDate').value;
+            const expiryDate = document.getElementById('expiryDate').value;
+
+            if (!currentProductData || !batchNo || !mfgDate || !expiryDate) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Display product information
+            document.getElementById('displayProductName').textContent =
+                currentProductData.productName || currentProductData.name;
+            document.getElementById('displayProductCode').textContent = currentProductData.code;
+            document.getElementById('displayBatchNo').textContent = batchNo;
+            document.getElementById('displayMfgDate').textContent = formatDate(mfgDate);
+            document.getElementById('displayExpiryDate').textContent = formatDate(expiryDate);
+
+            // Hide product code row for Raw Material tests
+            const productCodeRow = document.getElementById('productCodeRow');
+            if (currentTestType === 'raw-material') {
+                productCodeRow.style.display = 'none';
+            } else {
+                productCodeRow.style.display = 'grid';
+            }
+
+            // Generate test table
+            generateTestTable();
+
+            goToPage(3);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+
+        function generateTestTable() {
+            const tbody = document.getElementById('testTableBody');
+            tbody.innerHTML = '';
+
+            currentProductData.tests.forEach((test, index) => {
+                const row = tbody.insertRow();
+
+                const cellTest = row.insertCell(0);
+                cellTest.textContent = test.test;
+                cellTest.style.fontWeight = '600';
+
+                const cellSpec = row.insertCell(1);
+                cellSpec.textContent = test.specification;
+                cellSpec.className = 'spec-column';
+
+                const cellResult = row.insertCell(2);
+
+                // Don't add input for header rows
+                if (test.type === 'header') {
+                    cellResult.textContent = '';
+                    cellTest.colSpan = 3;
+                    cellTest.style.backgroundColor = '#667eea';
+                    cellTest.style.color = 'white';
+                    cellTest.style.padding = '12px 15px';
+                    cellTest.style.fontSize = '15px';
+                    cellTest.style.textAlign = 'left';
+                    cellSpec.remove();
+                    cellResult.remove();
+                    return;
+                }
+
+                // Create dropdown for compliance type, input for others
+                if (test.type === 'compliance') {
+                    const select = document.createElement('select');
+                    select.id = 'result_' + index;
+                    select.dataset.testIndex = index;
+                    select.style.width = '100%';
+                    select.style.padding = '8px';
+                    select.style.border = '1px solid #ddd';
+                    select.style.borderRadius = '4px';
+                    select.style.fontSize = '14px';
+
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = '-- Select Result --';
+                    defaultOption.disabled = true;
+                    defaultOption.selected = true;
+                    select.appendChild(defaultOption);
+
+                    const compliesOption = document.createElement('option');
+                    compliesOption.value = 'Complies';
+                    compliesOption.textContent = 'Complies';
+                    select.appendChild(compliesOption);
+
+                    const passesTestOption = document.createElement('option');
+                    passesTestOption.value = 'Passes test';
+                    passesTestOption.textContent = 'Passes test';
+                    select.appendChild(passesTestOption);
+
+                    select.addEventListener('change', validateResult);
+                    cellResult.appendChild(select);
+                } else {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = 'result_' + index;
+                    input.dataset.testIndex = index;
+
+                    if (test.detectable) {
+                        input.placeholder = 'Enter value or "Not Detected"';
+                    } else {
+                        input.placeholder = 'Enter result';
+                    }
+
+                    input.addEventListener('blur', validateResult);
+                    input.addEventListener('input', validateResult);
+                    cellResult.appendChild(input);
+                }
+            });
+        }
+
+        function validateResult(event) {
+            const input = event.target;
+            const testIndex = parseInt(input.dataset.testIndex);
+            const test = currentProductData.tests[testIndex];
+            const value = input.value.trim();
+
+            // Reset styling
+            input.style.borderColor = '#e0e0e0';
+            input.style.backgroundColor = 'white';
+
+            if (!value) {
+                checkOverallCompliance();
+                return;
+            }
+
+            let isValid = true;
+
+            // Handle compliance type
+            if (test.type === 'compliance') {
+                const lowerValue = value.toLowerCase();
+                if (lowerValue !== 'complies' && lowerValue !== 'passes test') {
+                    isValid = false;
+                }
+            }
+
+            // Handle numeric type with ranges
+            if (test.type === 'numeric') {
+                if (test.detectable && value.toLowerCase() === 'not detected') {
+                    isValid = true;
+                } else {
+                    const numValue = parseFloat(value);
+
+                    if (isNaN(numValue)) {
+                        isValid = false;
+                    } else if (test.range) {
+                        if (test.range.min !== undefined && numValue < test.range.min) {
+                            isValid = false;
+                        }
+                        if (test.range.max !== undefined && numValue > test.range.max) {
+                            isValid = false;
+                        }
+                    }
+                }
+            }
+
+            if (!isValid) {
+                input.style.borderColor = '#dc3545';
+                input.style.backgroundColor = '#f8d7da';
+            } else {
+                input.style.borderColor = '#28a745';
+                input.style.backgroundColor = '#d4edda';
+            }
+
+            checkOverallCompliance();
+        }
+
+        function checkOverallCompliance() {
+            let hasErrors = false;
+            let missingEntries = false;
+
+            currentProductData.tests.forEach((test, index) => {
+                if (test.type === 'header') {
+                    return;
+                }
+
+                const input = document.getElementById('result_' + index);
+                if (!input) {
+                    return;
+                }
+
+                const value = input.value.trim();
+
+                if (!value) {
+                    missingEntries = true;
+                    return;
+                }
+
+                // Validate compliance type
+                if (test.type === 'compliance') {
+                    const lowerValue = value.toLowerCase();
+                    if (lowerValue !== 'complies' && lowerValue !== 'passes test') {
+                        hasErrors = true;
+                    }
+                }
+
+                // Validate numeric type
+                if (test.type === 'numeric') {
+                    if (test.detectable && value.toLowerCase() === 'not detected') {
+                        return;
+                    }
+
+                    const numValue = parseFloat(value);
+                    if (isNaN(numValue)) {
+                        hasErrors = true;
+                        return;
+                    }
+
+                    if (test.range) {
+                        if ((test.range.min !== undefined && numValue < test.range.min) ||
+                            (test.range.max !== undefined && numValue > test.range.max)) {
+                            hasErrors = true;
+                        }
+                    }
+                }
+            });
+
+            const errorMessage = document.getElementById('errorMessage');
+            const downloadBtn = document.querySelector('.btn-success');
+
+            if (hasErrors) {
+                errorMessage.classList.add('show');
+                downloadBtn.disabled = true;
+                downloadBtn.style.opacity = '0.5';
+                downloadBtn.style.cursor = 'not-allowed';
+            } else {
+                errorMessage.classList.remove('show');
+                if (!missingEntries) {
+                    downloadBtn.disabled = false;
+                    downloadBtn.style.opacity = '1';
+                    downloadBtn.style.cursor = 'pointer';
+                } else {
+                    downloadBtn.disabled = true;
+                    downloadBtn.style.opacity = '0.7';
+                    downloadBtn.style.cursor = 'not-allowed';
+                }
+            }
+
+            return !hasErrors && !missingEntries;
+        }
+
+        function generatePDF() {
+            if (!checkOverallCompliance()) {
+                alert('Cannot generate PDF: Please correct all errors before downloading.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+
+            // Detect device type for responsive PDF sizing
+            const isMobile = window.innerWidth <= 768;
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            let pageNumber = 1;
+            const totalPages = calculateTotalPages();
+
+            // Function to add page number footer
+            function addPageNumber(doc, currentPage, total) {
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Page ${currentPage} of ${total}`, 105, 290, { align: 'center' });
+                doc.setTextColor(0, 0, 0);
+            }
+
+            // Function to calculate total pages needed
+            function calculateTotalPages() {
+                let estimatedHeight = 110; // Initial content height
+                currentProductData.tests.forEach(test => {
+                    if (test.type === 'header') {
+                        estimatedHeight += 13;
+                    } else {
+                        estimatedHeight += 6;
+                    }
+                });
+                return Math.ceil(estimatedHeight / 240) + 1; // +1 for footer page if needed
+            }
+
+            // Draw header on first page
+            function drawHeader(isFirstPage = true) {
+                // Company logo and name
+                doc.setFontSize(18);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(102, 126, 234);
+                doc.text('CCPL', 170, 15);
+                doc.setTextColor(0, 0, 0);
+
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text('Cognizant Chemical Pvt. Ltd.', 145, 21);
+
+                // Product name on left
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                const productNameLines = doc.splitTextToSize(currentProductData.name, 120);
+                doc.text(productNameLines, 15, 15);
+
+                let headerYPos = 15 + (productNameLines.length * 5);
+                if (currentProductData.standard) {
+                    doc.setFontSize(10);
+                    doc.text(currentProductData.standard, 15, headerYPos + 3);
+                }
+
+                // Horizontal line
+                doc.setLineWidth(0.5);
+                doc.setDrawColor(102, 126, 234);
+                doc.line(15, 28, 195, 28);
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.1);
+            }
+
+            // First page
+            drawHeader(true);
+
+            // Certificate of Analysis title
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('Certificate of Analysis', 15, 38);
+
+            // Product information section
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            let yPos = 48;
+
+            // Only show Product Code for Finish Goods
+            if (currentTestType !== 'raw-material') {
+                doc.setFont(undefined, 'bold');
+                doc.text('Product Code:', 15, yPos);
+                doc.setFont(undefined, 'normal');
+                doc.text(currentProductData.code, 65, yPos);
+                yPos += 6;
+            }
+
+            doc.setFont(undefined, 'bold');
+            doc.text('Product Name:', 15, yPos);
+            doc.setFont(undefined, 'normal');
+            const productNameText = currentProductData.productName || currentProductData.name;
+            const productNameLines = doc.splitTextToSize(productNameText, 125);
+            doc.text(productNameLines, 65, yPos);
+            yPos += productNameLines.length * 5 + 1;
+
+            doc.setFont(undefined, 'bold');
+            doc.text('Batch No.:', 15, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(document.getElementById('displayBatchNo').textContent, 65, yPos);
+            yPos += 6;
+
+            doc.setFont(undefined, 'bold');
+            doc.text('Manufacturing Date:', 15, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(document.getElementById('displayMfgDate').textContent, 65, yPos);
+            yPos += 6;
+
+            doc.setFont(undefined, 'bold');
+            doc.text('Expiry Date:', 15, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text(document.getElementById('displayExpiryDate').textContent, 65, yPos);
+            yPos += 6;
+
+            // Test results table header
+            yPos += 8;
+            doc.setFillColor(240, 240, 240);
+            doc.rect(15, yPos - 5, 180, 8, 'F');
+
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            doc.text('Test Parameter', 17, yPos);
+            doc.text('Specification', 75, yPos);
+            doc.text('Result', 155, yPos);
+
+            yPos += 2;
+            doc.setLineWidth(0.3);
+            doc.line(15, yPos, 195, yPos);
+            doc.setLineWidth(0.1);
+
+            doc.setFont(undefined, 'normal');
+            yPos += 6;
+
+            // Test results rows
+            currentProductData.tests.forEach((test, index) => {
+                // Check if we need a new page (leave space for footer and page number)
+                if (yPos > 255) {
+                    addPageNumber(doc, pageNumber, totalPages);
+                    doc.addPage();
+                    pageNumber++;
+                    yPos = 20;
+
+                    // Redraw table header on new page
+                    doc.setFillColor(240, 240, 240);
+                    doc.rect(15, yPos - 5, 180, 8, 'F');
+
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Test Parameter', 17, yPos);
+                    doc.text('Specification', 75, yPos);
+                    doc.text('Result', 155, yPos);
+
+                    yPos += 2;
+                    doc.setLineWidth(0.3);
+                    doc.line(15, yPos, 195, yPos);
+                    doc.setLineWidth(0.1);
+
+                    doc.setFont(undefined, 'normal');
+                    yPos += 6;
+                }
+
+                doc.setFontSize(8.5);
+
+                // Handle section headers
+                if (test.type === 'header') {
+                    yPos += 2;
+                    doc.setFontSize(9.5);
+                    doc.setFont(undefined, 'bold');
+                    doc.setFillColor(102, 126, 234);
+                    doc.rect(15, yPos - 4, 180, 7, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.text(test.test, 17, yPos + 1);
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont(undefined, 'normal');
+                    doc.setFontSize(8.5);
+                    yPos += 9;
+                    return;
+                }
+
+                const input = document.getElementById('result_' + index);
+                const result = input ? (input.value || '-') : '-';
+
+                // Split long text to fit columns
+                const testLines = doc.splitTextToSize(test.test, 56);
+                const specLines = doc.splitTextToSize(test.specification, 78);
+                const resultLines = doc.splitTextToSize(result, 38);
+
+                // Draw alternating row background
+                const maxLines = Math.max(testLines.length, specLines.length, resultLines.length);
+                const rowHeight = maxLines * 4.5 + 2;
+
+                if (index % 2 === 0) {
+                    doc.setFillColor(250, 250, 250);
+                    doc.rect(15, yPos - 3, 180, rowHeight, 'F');
+                }
+
+                // Draw cell content
+                doc.text(testLines, 17, yPos);
+                doc.text(specLines, 75, yPos);
+                doc.text(resultLines, 155, yPos);
+
+                yPos += rowHeight;
+            });
+
+            // Footer section
+            if (yPos > 235) {
+                addPageNumber(doc, pageNumber, totalPages);
+                doc.addPage();
+                pageNumber++;
+                yPos = 20;
+            } else {
+                yPos += 10;
+            }
+
+            // Add border for footer
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.3);
+            doc.line(15, yPos - 5, 195, yPos - 5);
+
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'italic');
+            doc.setTextColor(80, 80, 80);
+            doc.text('This is a computer generated report and hence signature is not required', 15, yPos);
+            doc.setTextColor(0, 0, 0);
+
+            yPos += 8;
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(9);
+            doc.text('COGNIZANT CHEMICAL PRIVATE LIMITED', 15, yPos);
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(7.5);
+            yPos += 4;
+            doc.text('Regd. Off: B-120, Dama Office Premises, Smed Market, Kalamboli, Navi Mumbai-410218', 15, yPos);
+            yPos += 3.5;
+            doc.text('Mobile: 9766652255 / 9920272227  |  Email: admin@cognizantchemical.com', 15, yPos);
+            yPos += 3.5;
+            doc.text('Website: www.cognizantchemical.com', 15, yPos);
+
+            // Add page number to last page
+            addPageNumber(doc, pageNumber, totalPages);
+
+            // Generate filename
+            const batchNo = document.getElementById('displayBatchNo').textContent;
+            const productCode = currentTestType === 'raw-material' ?
+                currentProductData.name.replace(/[^a-zA-Z0-9]/g, '_') :
+                currentProductData.code;
+            const fileName = `COA_${productCode}_${batchNo}.pdf`;
+
+            doc.save(fileName);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            checkAuth();
+            await loadProductData();
+        });
+    </script>
+</body>
+</html>
