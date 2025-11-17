@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>COA Generator - Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 { color: #667eea; }
+        h2 { color: #2c3e50; margin-top: 20px; }
+        .success { color: #27ae60; font-weight: bold; }
+        .error { color: #e74c3c; font-weight: bold; }
+        .info { background: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 15px 0; }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+        }
+        .button:hover { background: #5568d3; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        ul { line-height: 1.8; }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>🧪 COA Generator - Quick Test</h1>
+        
+        <div id="serverCheck">
+            <h2>Step 1: Check Server</h2>
+            <p>Testing if server is running...</p>
+        </div>
+
+        <div id="dataCheck" style="display: none;">
+            <h2>Step 2: Check Data Files</h2>
+            <p>Testing if JSON files can be loaded...</p>
+        </div>
+
+        <div id="results" style="display: none;"></div>
+
+        <div id="nextSteps" style="display: none;">
+            <h2>✅ Next Steps</h2>
+            <a href="http://localhost:8888/login.html" class="button">Open Login Page</a>
+            <div class="info" style="margin-top: 20px;">
+                <strong>Login with:</strong><br>
+                Username: <code>admin</code><br>
+                Password: <code>ccpl@2024</code>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function runTests() {
+            const serverCheck = document.getElementById('serverCheck');
+            const dataCheck = document.getElementById('dataCheck');
+            const results = document.getElementById('results');
+            const nextSteps = document.getElementById('nextSteps');
+
+            try {
+                // Test 1: Server connectivity
+                serverCheck.innerHTML = '<h2>Step 1: Check Server</h2><p>Testing server...</p>';
+                const testResponse = await fetch('data/rm-products.json');
+                
+                if (!testResponse.ok) {
+                    throw new Error('Server responded with: ' + testResponse.status);
+                }
+
+                serverCheck.innerHTML = '<h2>Step 1: Check Server ✓</h2><p class="success">Server is running correctly!</p>';
+
+                // Test 2: Load RM products
+                dataCheck.style.display = 'block';
+                dataCheck.innerHTML = '<h2>Step 2: Check Data Files</h2><p>Loading RM products...</p>';
+                
+                const rmData = await testResponse.json();
+                const rmProducts = rmData.products;
+
+                // Test 3: Load FG products
+                dataCheck.innerHTML = '<h2>Step 2: Check Data Files</h2><p>Loading FG products...</p>';
+                const fgResponse = await fetch('data/fg-products.json');
+                const fgData = await fgResponse.json();
+                const fgProducts = fgData.products;
+
+                dataCheck.innerHTML = '<h2>Step 2: Check Data Files ✓</h2><p class="success">All data files loaded successfully!</p>';
+
+                // Show results
+                results.style.display = 'block';
+                results.innerHTML = `
+                    <h2>✓ Test Results</h2>
+                    
+                    <h3>Raw Materials (${rmProducts.length} products):</h3>
+                    <ul>
+                        ${rmProducts.map(p => `<li><strong>${p.code}</strong>: ${p.chemicalName} (${p.tests.length} tests)</li>`).join('')}
+                    </ul>
+
+                    <h3>Finish Goods (${fgProducts.length} products):</h3>
+                    <ul>
+                        ${fgProducts.map(p => `<li><strong>${p.code}</strong>: ${p.productName} (${p.tests.length} tests)</li>`).join('')}
+                    </ul>
+
+                    <div class="info">
+                        <strong>Total:</strong> ${rmProducts.length + fgProducts.length} products with ${rmProducts.reduce((sum, p) => sum + p.tests.length, 0) + fgProducts.reduce((sum, p) => sum + p.tests.length, 0)} test parameters
+                    </div>
+                `;
+
+                nextSteps.style.display = 'block';
+
+            } catch (error) {
+                serverCheck.innerHTML = `
+                    <h2>❌ Test Failed</h2>
+                    <p class="error">Error: ${error.message}</p>
+                    <div class="info">
+                        <strong>Solution:</strong><br>
+                        1. Make sure the server is running<br>
+                        2. Open Terminal and run:<br>
+                        <code>cd "/Users/rupimac/Downloads/COA GENERATOR 17 NOV"</code><br>
+                        <code>python3 -m http.server 8888</code><br>
+                        3. Then refresh this page
+                    </div>
+                `;
+            }
+        }
+
+        // Run tests when page loads
+        runTests();
+    </script>
+</body>
+</html>
